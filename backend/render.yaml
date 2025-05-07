@@ -2,7 +2,7 @@ services:
   - type: web
     name: devvoid-backend
     env: node
-    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    buildCommand: npm install && npm install --save-dev @types/node @types/express @types/jest @types/cors @types/mongoose @types/bcryptjs @types/jsonwebtoken @types/winston && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
