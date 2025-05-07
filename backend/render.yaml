@@ -2,7 +2,10 @@ services:
   - type: web
     name: devvoid-backend
     env: node
-    buildCommand: npm install && npm install --save-dev @types/node @types/express @types/jest @types/cors @types/mongoose @types/bcryptjs @types/jsonwebtoken @types/winston && npm run build
+    buildCommand: |
+      npm install && 
+      npm install --save-dev @types/node @types/express @types/jest @types/cors @types/mongoose @types/bcryptjs @types/jsonwebtoken @types/winston @types/dotenv @types/url @types/path @types/express-validator @google/generative-ai && 
+      npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
