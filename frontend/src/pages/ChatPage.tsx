@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChatSidebar } from '../components/organisms/ChatSidebar';
 import { ChatWindow } from '../components/organisms/ChatWindow';
 import { chatApi } from '../services/api';
-import { Chat } from '../types/chat';
+import { Chat, Message } from '../types/chat';
 
 export const ChatPage = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -91,8 +91,26 @@ export const ChatPage = () => {
       setLoading(true);
       const response = await chatApi.summarizeDay(currentChat._id);
       const summary = response.data.data.summary;
-      // Handle the summary (e.g., display it in the chat)
-      console.log('Daily summary:', summary);
+      
+      // Create a new message with the summary
+      const aiMessage: Message = {
+        _id: new Date().getTime().toString(),
+        content: summary,
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      };
+
+      // Update the chat with the new message
+      const updatedChat: Chat = {
+        ...currentChat,
+        messages: [...currentChat.messages, aiMessage]
+      };
+
+      setChats(chats.map(chat => 
+        chat._id === updatedChat._id ? updatedChat : chat
+      ));
+      setCurrentChat(updatedChat);
     } catch (error: any) {
       console.error('Error generating summary:', error);
     } finally {
@@ -105,9 +123,27 @@ export const ChatPage = () => {
     try {
       setLoading(true);
       const response = await chatApi.getMotivation(currentChat._id);
-      const summary = response.data.data.summary;
-      // Handle the motivation (e.g., display it in the chat)
-      console.log('Motivation:', summary);
+      const motivation = response.data.data.summary;
+      
+      // Create a new message with the motivation
+      const aiMessage: Message = {
+        _id: new Date().getTime().toString(),
+        content: motivation,
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        mood: 'excited'
+      };
+
+      // Update the chat with the new message
+      const updatedChat: Chat = {
+        ...currentChat,
+        messages: [...currentChat.messages, aiMessage]
+      };
+
+      setChats(chats.map(chat => 
+        chat._id === updatedChat._id ? updatedChat : chat
+      ));
+      setCurrentChat(updatedChat);
     } catch (error: any) {
       console.error('Error getting motivation:', error);
     } finally {
@@ -120,9 +156,27 @@ export const ChatPage = () => {
     try {
       setLoading(true);
       const response = await chatApi.getImprovements(currentChat._id);
-      const summary = response.data.data.summary;
-      // Handle the improvements (e.g., display it in the chat)
-      console.log('Improvements:', summary);
+      const improvements = response.data.data.summary;
+      
+      // Create a new message with the improvements
+      const aiMessage: Message = {
+        _id: new Date().getTime().toString(),
+        content: improvements,
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      };
+
+      // Update the chat with the new message
+      const updatedChat: Chat = {
+        ...currentChat,
+        messages: [...currentChat.messages, aiMessage]
+      };
+
+      setChats(chats.map(chat => 
+        chat._id === updatedChat._id ? updatedChat : chat
+      ));
+      setCurrentChat(updatedChat);
     } catch (error: any) {
       console.error('Error getting improvements:', error);
     } finally {
