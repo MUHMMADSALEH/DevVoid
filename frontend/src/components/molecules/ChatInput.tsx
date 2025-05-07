@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Button } from '../atoms/Button';
 
 interface ChatInputProps {
-  onSendMessage: (content: string) => Promise<void>;
+  onSend: (content: string) => Promise<void>;
   isLoading: boolean;
 }
 
-export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
+export const ChatInput = ({ onSend, isLoading }: ChatInputProps) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -14,7 +14,7 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
     if (!message.trim() || isLoading) return;
 
     try {
-      await onSendMessage(message.trim());
+      await onSend(message.trim());
       setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);

@@ -1,66 +1,84 @@
-import { useEffect, useRef } from 'react';
-import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
-import { useChatStore } from '../../store/chat.store';
-import { chatApi } from '../../services/api';
+import { ChatMessage } from '../molecules/ChatMessage';
+import { Button } from '../atoms/Button';
 
-export const ChatWindow = () => {
-  const { currentChat, loading, setLoading, setError, addMessage } = useChatStore();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+interface Chat {
+  _id: string;
+  title: string;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+interface Message {
+  _id: string;
+  content: string;
+  type: 'user' | 'assistant';
+  createdAt: string;
+  mood?: 'happy' | 'sad' | 'neutral' | 'stressed' | 'excited';
+}
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [currentChat?.messages]);
+interface ChatWindowProps {
+  chat: Chat;
+  onSendMessage: (content: string) => Promise<void>;
+  loading: boolean;
+  onSummarizeDay: () => Promise<void>;
+  onGetMotivation: () => Promise<void>;
+  onGetImprovements: () => Promise<void>;
+}
 
-  const handleSendMessage = async (content: string) => {
-    if (!currentChat) return;
-
-    try {
-      setLoading(true);
-      const response = await chatApi.sendMessage({
-        chatId: currentChat._id,
-        content,
-      });
-
-      const { chat, mood } = response.data.data;
-      addMessage(currentChat._id, {
-        content,
-        sender: 'user',
-        timestamp: new Date(),
-        mood,
-      });
-
-      if (chat.messages[chat.messages.length - 1]) {
-        addMessage(currentChat._id, chat.messages[chat.messages.length - 1]);
-      }
-    } catch (error) {
-      setError('Failed to send message');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!currentChat) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Select a chat or start a new one</p>
-      </div>
-    );
-  }
-
+export const ChatWindow = ({
+  chat,
+  onSendMessage,
+  loading,
+  onSummarizeDay,
+  onGetMotivation,
+  onGetImprovements,
+}: ChatWindowProps) => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {currentChat.messages.map((message, index) => (
-          <MessageBubble key={index} message={message} />
+        {chat.messages.map((message) => (
+          <ChatMessage
+            key={message._id}
+            content={message.content}
+            type={message.type}
+            timestamp={new Date(message.createdAt)}
+            mood={message.mood}
+          />
         ))}
-        <div ref={messagesEndRef} />
       </div>
-      <ChatInput onSend={handleSendMessage} isLoading={loading} />
+
+      <div className="p-4 border-t border-gray-200 bg-white">
+        <div className="flex gap-2 mb-4">
+          <Button
+            variant="secondary"
+            onClick={onSummarizeDay}
+            className="flex-1"
+            disabled={loading}
+          >
+            Summarize Day
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onGetMotivation}
+            className="flex-1"
+            disabled={loading}
+          >
+            Get Motivation
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onGetImprovements}
+            className="flex-1"
+            disabled={loading}
+          >
+            Weekly Improvements
+          </Button>
+        </div>
+
+        <ChatInput onSend={onSendMessage} isLoading={loading} />
+      </div>
     </div>
   );
 }; 

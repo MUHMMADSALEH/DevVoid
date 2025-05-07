@@ -25,17 +25,14 @@ export const validateRequest = (validations: any[]) => {
         return next();
       }
 
-      const extractedErrors = errors.array().map((err: ValidationError) => ({
-        field: err.type === 'field' ? err.path : 'unknown',
-        message: err.msg,
-      }));
-
+      // Pass the original validation errors to AppError
+      const validationErrors = errors.array();
       logger.error('Validation failed:', {
-        errors: extractedErrors,
+        errors: validationErrors,
         body: req.body
       });
 
-      next(new AppError('Validation failed', 400, extractedErrors));
+      next(new AppError('Validation failed', 400, validationErrors));
     } catch (error) {
       logger.error('Validation error:', error);
       next(error);

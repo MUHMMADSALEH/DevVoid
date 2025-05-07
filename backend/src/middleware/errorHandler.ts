@@ -1,13 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger.js';
+import { ValidationError } from 'express-validator';
+
+interface ValidationErrorResponse {
+  errors: ValidationError[];
+}
 
 export class AppError extends Error {
   statusCode: number;
   status: string;
   isOperational: boolean;
-  errors?: any[];
+  errors?: ValidationError[];
 
-  constructor(message: string, statusCode: number, errors?: any[]) {
+  constructor(message: string, statusCode: number, errors?: ValidationError[]) {
     super(message);
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
@@ -40,12 +45,13 @@ export const errorHandler = (
   }
 
   // Handle validation errors from express-validator
-  if (err.name === 'ValidationError') {
-    logger.error('Validation error:', err);
+  if (err.name === 'ValidationError' && 'errors' in err) {
+    const validationError = err as Error & ValidationErrorResponse;
+    logger.error('Validation error:', validationError);
     return res.status(400).json({
       status: 'fail',
       message: 'Validation failed',
-      errors: err.errors,
+      errors: validationError.errors,
       timestamp: new Date().toISOString()
     });
   }

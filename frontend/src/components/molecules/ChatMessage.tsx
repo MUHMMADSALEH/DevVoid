@@ -2,9 +2,9 @@ import { format } from 'date-fns';
 
 interface ChatMessageProps {
   content: string;
-  sender: 'user' | 'ai';
+  type: 'user' | 'assistant';
   timestamp: Date;
-  mood?: string;
+  mood?: 'happy' | 'sad' | 'neutral' | 'stressed' | 'excited';
 }
 
 const moodEmojis: Record<string, string> = {
@@ -23,22 +23,18 @@ const moodLabels: Record<string, string> = {
   excited: 'Feeling Excited',
 };
 
-export const ChatMessage = ({ content, sender, timestamp, mood }: ChatMessageProps) => {
-  const isUser = sender === 'user';
+export const ChatMessage = ({ content, type, timestamp, mood }: ChatMessageProps) => {
+  const isUser = type === 'user';
   const moodEmoji = mood ? moodEmojis[mood] : null;
   const moodLabel = mood ? moodLabels[mood] : null;
 
   return (
-    <div
-      className={`flex ${
-        isUser ? 'justify-end' : 'justify-start'
-      }`}
-    >
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[80%] rounded-lg p-4 ${
+        className={`max-w-[70%] rounded-lg p-3 ${
           isUser
             ? 'bg-[#FFD600] text-[#3B2F1E]'
-            : 'bg-gray-100 text-gray-800'
+            : 'bg-white text-gray-800 border border-gray-200'
         }`}
       >
         <div className="flex items-start gap-2">

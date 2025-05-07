@@ -1,74 +1,65 @@
-import { useEffect } from 'react';
-import { format } from 'date-fns';
 import { Button } from '../atoms/Button';
-import { useChatStore } from '../../store/chat.store';
-import { chatApi } from '../../services/api';
-import { useAuthStore } from '../../store/auth.store';
-import { useNavigate } from 'react-router-dom';
 
-export const ChatSidebar = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
-  const { chats, currentChat, setChats, setCurrentChat, setLoading, setError } =
-    useChatStore();
+interface Chat {
+  _id: string;
+  title: string;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+interface Message {
+  _id: string;
+  content: string;
+  type: 'user' | 'assistant';
+  createdAt: string;
+}
 
-    const fetchChats = async () => {
-      try {
-        setLoading(true);
-        const response = await chatApi.getChatHistory();
-        setChats(response.data.data.chats);
-      } catch (error) {
-        setError('Failed to fetch chat history');
-      } finally {
-        setLoading(false);
-      }
-    };
+interface ChatSidebarProps {
+  chats: Chat[];
+  currentChat: Chat | null;
+  onSelectChat: (chat: Chat) => void;
+  onCreateChat: () => Promise<void>;
+}
 
-    fetchChats();
-  }, [isAuthenticated, navigate]);
-
-  const handleNewChat = async () => {
-    try {
-      setLoading(true);
-      const response = await chatApi.createChat();
-      const newChat = response.data.data.chat;
-      setChats([newChat, ...chats]);
-      setCurrentChat(newChat);
-    } catch (error) {
-      setError('Failed to create new chat');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export const ChatSidebar = ({
+  chats,
+  currentChat,
+  onSelectChat,
+  onCreateChat,
+}: ChatSidebarProps) => {
   return (
-    <div className="w-64 border-r h-full flex flex-col">
-      <div className="p-4 border-b">
-        <Button onClick={handleNewChat} className="w-full">
+    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="p-4 border-b border-gray-200">
+        <h2 className="text-xl font-bold text-[#3B2F1E] mb-4">Chats</h2>
+        <Button
+          variant="primary"
+          onClick={onCreateChat}
+          className="w-full"
+        >
           New Chat
         </Button>
       </div>
-      <div className="flex-1 overflow-y-auto">
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {chats.map((chat) => (
           <button
             key={chat._id}
-            onClick={() => setCurrentChat(chat)}
-            className={`
-              w-full p-4 text-left border-b hover:bg-gray-50
-              ${currentChat?._id === chat._id ? 'bg-gray-50' : ''}
-            `}
+            onClick={() => onSelectChat(chat)}
+            className={`w-full text-left p-3 rounded-lg transition-colors ${
+              currentChat?._id === chat._id
+                ? 'bg-[#FFD600] text-[#3B2F1E]'
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
           >
-            <div className="text-sm font-medium text-gray-900">
-              {format(new Date(chat.createdAt), 'MMM d, yyyy')}
+            <div className="text-sm font-medium truncate">
+              {chat.title || 'New Chat'}
             </div>
             <div className="text-xs text-gray-500 truncate">
               {chat.messages[0]?.content || 'No messages yet'}
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              {new Date(chat.createdAt).toLocaleDateString()}
             </div>
           </button>
         ))}

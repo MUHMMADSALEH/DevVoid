@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useAuthStore } from '../store/auth.store';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -55,21 +54,18 @@ export const authApi = {
 };
 
 export const chatApi = {
-  chat: {
-    createChat: () => api.post('/chat/create'),
-    sendMessage: (chatId: string, content: string) =>
-      api.post('/chat/message', { 
-        chatId,
-        content,
-        type: 'user'
-      }),
-    getChatHistory: () => api.get('/chat/history'),
-    getSummary: (chatId: string) => api.post(`/chat/${chatId}/summary`),
-    getInsights: (chatId: string) => api.get(`/chat/${chatId}/insights`),
-    getMotivation: (chatId: string) => api.post(`/chat/${chatId}/summary`, { type: 'motivation' }),
-    getImprovements: (chatId: string) => api.post(`/chat/${chatId}/summary`, { type: 'improvements' }),
-  },
-  // Special prompts
+  getChatHistory: () => api.get('/chat/history'),
+  createChat: () => api.post('/chat/create'),
+  sendMessage: (chatId: string, content: string) =>
+    api.post('/chat/message', { 
+      chatId,
+      content,
+      type: 'user'
+    }),
+  getSummary: (chatId: string) => api.post(`/chat/${chatId}/summary`),
+  getInsights: (chatId: string) => api.get(`/chat/${chatId}/insights`),
+  getMotivation: (chatId: string) => api.post(`/chat/${chatId}/summary`, { type: 'motivation' }),
+  getImprovements: (chatId: string) => api.post(`/chat/${chatId}/summary`, { type: 'improvements' }),
   summarizeDay: (chatId: string) =>
     api.post(`/chat/${chatId}/summary`, { type: 'daily' }),
 };
