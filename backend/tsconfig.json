@@ -12,7 +12,12 @@
     "rootDir": "./src",
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types"],
-    "allowJs": true
+    "allowJs": true,
+    "types": ["node", "jest", "express"]
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

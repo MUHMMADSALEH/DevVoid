@@ -1,18 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger.js';
-import { ValidationError } from 'express-validator';
+import expressValidator from 'express-validator';
 
 interface ValidationErrorResponse {
-  errors: ValidationError[];
+  errors: expressValidator.ValidationError[];
 }
 
 export class AppError extends Error {
   statusCode: number;
   status: string;
   isOperational: boolean;
-  errors?: ValidationError[];
+  errors?: expressValidator.ValidationError[];
 
-  constructor(message: string, statusCode: number, errors?: ValidationError[]) {
+  constructor(message: string, statusCode: number, errors?: expressValidator.ValidationError[]) {
     super(message);
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
