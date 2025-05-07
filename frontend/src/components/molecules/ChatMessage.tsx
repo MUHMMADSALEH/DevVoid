@@ -28,6 +28,11 @@ export const ChatMessage = ({ content, type, timestamp, mood }: ChatMessageProps
   const moodEmoji = mood ? moodEmojis[mood] : null;
   const moodLabel = mood ? moodLabels[mood] : null;
 
+  // Ensure we have a valid date
+  const messageDate = timestamp instanceof Date && !isNaN(timestamp.getTime())
+    ? timestamp
+    : new Date(timestamp);
+
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
@@ -54,7 +59,7 @@ export const ChatMessage = ({ content, type, timestamp, mood }: ChatMessageProps
                   isUser ? 'text-[#3B2F1E]/70' : 'text-gray-500'
                 }`}
               >
-                {format(new Date(timestamp), 'h:mm a')}
+                {format(messageDate, 'h:mm a')}
               </div>
               {isUser && moodEmoji && (
                 <div className="flex items-center gap-1">

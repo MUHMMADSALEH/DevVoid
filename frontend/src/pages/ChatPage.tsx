@@ -2,21 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChatSidebar } from '../components/organisms/ChatSidebar';
 import { ChatWindow } from '../components/organisms/ChatWindow';
 import { chatApi } from '../services/api';
-
-interface Chat {
-  _id: string;
-  title: string;
-  messages: Message[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Message {
-  _id: string;
-  content: string;
-  type: 'user' | 'assistant';
-  createdAt: string;
-}
+import { Chat } from '../types/chat';
 
 export const ChatPage = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -27,13 +13,38 @@ export const ChatPage = () => {
     fetchChatHistory();
   }, []);
 
+  const generateChatTitle = (messages: Chat['messages']) => {
+    if (!messages.length) return 'New Chat';
+    
+    // Get the first user message
+    const firstUserMessage = messages.find(m => m.sender === 'user')?.content;
+    if (!firstUserMessage) return 'New Chat';
+
+    // Clean and truncate the message
+    const cleanMessage = firstUserMessage
+      .replace(/[^\w\s]/g, '') // Remove special characters
+      .trim()
+      .split(/\s+/) // Split into words
+      .slice(0, 5) // Take first 5 words
+      .join(' ');
+
+    return cleanMessage.length > 30 
+      ? cleanMessage.substring(0, 30) + '...'
+      : cleanMessage;
+  };
+
   const fetchChatHistory = async () => {
     try {
       const response = await chatApi.getChatHistory();
       const chatHistory = response.data.data.chats;
-      setChats(chatHistory);
-      if (chatHistory.length > 0) {
-        setCurrentChat(chatHistory[0]);
+      // Generate titles for chats that don't have one
+      const chatsWithTitles = chatHistory.map((chat: Chat) => ({
+        ...chat,
+        title: chat.title || generateChatTitle(chat.messages)
+      }));
+      setChats(chatsWithTitles);
+      if (chatsWithTitles.length > 0) {
+        setCurrentChat(chatsWithTitles[0]);
       }
     } catch (error) {
       console.error('Error fetching chat history:', error);
@@ -57,6 +68,12 @@ export const ChatPage = () => {
       setLoading(true);
       const response = await chatApi.sendMessage(currentChat._id, message);
       const updatedChat = response.data.data.chat;
+      
+      // Generate title if this is the first message
+      if (updatedChat.messages.length === 1) {
+        updatedChat.title = generateChatTitle(updatedChat.messages);
+      }
+
       setChats(chats.map(chat => 
         chat._id === updatedChat._id ? updatedChat : chat
       ));

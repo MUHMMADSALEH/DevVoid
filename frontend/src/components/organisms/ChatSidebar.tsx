@@ -1,19 +1,7 @@
 import { Button } from '../atoms/Button';
-
-interface Chat {
-  _id: string;
-  title: string;
-  messages: Message[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Message {
-  _id: string;
-  content: string;
-  type: 'user' | 'assistant';
-  createdAt: string;
-}
+import { Chat } from '../../types/chat';
+import { useAuthStore } from '../../store/auth.store';
+import { useNavigate } from 'react-router-dom';
 
 interface ChatSidebarProps {
   chats: Chat[];
@@ -28,6 +16,18 @@ export const ChatSidebar = ({
   onSelectChat,
   onCreateChat,
 }: ChatSidebarProps) => {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200">
@@ -35,9 +35,16 @@ export const ChatSidebar = ({
         <Button
           variant="primary"
           onClick={onCreateChat}
-          className="w-full"
+          className="w-full mb-2"
         >
           New Chat
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={handleLogout}
+          className="w-full"
+        >
+          Logout
         </Button>
       </div>
 
