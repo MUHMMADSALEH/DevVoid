@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F8F7F2] text-[#3B2F1E] font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-[#3B2F1E];
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+} 
