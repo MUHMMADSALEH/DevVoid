@@ -2,8 +2,8 @@ services:
   - type: web
     name: devvoid-backend
     env: node
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm start
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production

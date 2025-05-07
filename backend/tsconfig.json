@@ -12,7 +12,8 @@
     "rootDir": "./src",
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types"],
-    "allowJs": true
+    "allowJs": true,
+    "types": ["node", "jest", "express", "mongoose", "bcryptjs", "jsonwebtoken", "winston"]
   },
   "ts-node": {
     "esm": true,
