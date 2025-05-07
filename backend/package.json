@@ -9,7 +9,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "postinstall": "npm run build"
+    "postinstall": "tsc"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
