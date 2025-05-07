@@ -7,9 +7,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "build": "npm install && tsc",
-    "test": "jest",
-    "postinstall": "npm install"
+    "build": "tsc",
+    "test": "jest"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
