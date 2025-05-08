@@ -43,7 +43,7 @@ export const ChatMessage = ({ content, type, timestamp, mood, isLoading }: ChatM
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <motion.div
-        className={`max-w-[70%] rounded-lg p-3 ${
+        className={`max-w-[85%] rounded-lg p-3 ${
           isUser
             ? 'bg-[#FFD600] text-[#3B2F1E]'
             : 'bg-white text-gray-800 border border-gray-200'
@@ -52,10 +52,10 @@ export const ChatMessage = ({ content, type, timestamp, mood, isLoading }: ChatM
         animate={{ scale: 1 }}
         transition={{ duration: 0.2 }}
       >
-        <div className="flex items-start gap-2">
+        <div className={`flex ${!isUser ? 'flex-row items-start' : 'flex-col'} gap-2`}>
           {!isUser && moodEmoji && (
             <motion.div 
-              className="flex flex-col items-center"
+              className="flex flex-row items-center gap-1"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
@@ -63,7 +63,7 @@ export const ChatMessage = ({ content, type, timestamp, mood, isLoading }: ChatM
               <span className="text-xl" role="img" aria-label={`Mood: ${mood}`}>
                 {moodEmoji}
               </span>
-              <span className="text-xs text-gray-500 mt-1">{moodLabel}</span>
+              <span className="text-xs text-gray-500 hidden sm:inline">{moodLabel}</span>
             </motion.div>
           )}
           <div className="flex-1">
@@ -75,7 +75,7 @@ export const ChatMessage = ({ content, type, timestamp, mood, isLoading }: ChatM
               </div>
             ) : (
               <motion.div 
-                className="whitespace-pre-wrap"
+                className="whitespace-pre-wrap break-words"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}

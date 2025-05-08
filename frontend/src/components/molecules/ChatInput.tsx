@@ -22,7 +22,7 @@ export const ChatInput = ({ onSend, isLoading }: ChatInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex gap-2 px-2">
       <input
         type="text"
         value={message}
@@ -38,6 +38,7 @@ export const ChatInput = ({ onSend, isLoading }: ChatInputProps) => {
         variant="primary"
         disabled={!message.trim() || isLoading}
         isLoading={isLoading}
+        className="whitespace-nowrap"
       >
         Send
       </Button>

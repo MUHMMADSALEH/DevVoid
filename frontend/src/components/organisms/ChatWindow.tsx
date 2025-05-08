@@ -131,7 +131,9 @@ export const ChatWindow = ({
           </Button>
         </div>
 
-        <ChatInput onSend={onSendMessage} isLoading={loading} />
+        <div className="px-2">
+          <ChatInput onSend={onSendMessage} isLoading={loading} />
+        </div>
       </div>
     </div>
   );
