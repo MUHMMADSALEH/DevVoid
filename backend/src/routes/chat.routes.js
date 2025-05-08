@@ -12,14 +12,46 @@ const chatController = new ChatController();
 // Protect all routes
 router.use(protect);
 
-// Chat routes
-router.post('/', chatController.createChat);
+// Get chat history for the authenticated user (must be before /:chatId route)
+router.get('/history', chatController.getChatHistory);
+
+// Create a new chat
+router.post('/create', chatController.createChat);
+
+// Get all chats
 router.get('/', chatController.getChats);
+
+// Send a message (new endpoint to match frontend)
+router.post('/message', checkSchema(messageSchema), validate, async (req, res, next) => {
+  try {
+    const { chatId, content } = req.body;
+    if (!chatId) {
+      throw new Error('Chat ID is required');
+    }
+    req.params = { chatId };
+    req.body = { content };
+    await chatController.sendMessage(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get a specific chat
 router.get('/:chatId', chatController.getChat);
+
+// Send a message in a chat (keeping for backward compatibility)
 router.post('/:chatId/messages', checkSchema(messageSchema), validate, chatController.sendMessage);
+
+// Update a chat
 router.patch('/:chatId', chatController.updateChat);
+
+// Delete a chat
 router.delete('/:chatId', chatController.deleteChat);
+
+// Get chat summary
 router.get('/:chatId/summary', chatController.getSummary);
+
+// Get chat insights
 router.get('/:chatId/insights', chatController.getInsights);
 
 export default router; 

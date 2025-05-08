@@ -2,7 +2,12 @@ import expressValidator from 'express-validator';
 const { checkSchema } = expressValidator;
 
 export const registerSchema = {
-  email: {
+  user: {
+    isObject: {
+      errorMessage: 'User object is required',
+    },
+  },
+  'user.email': {
     isEmail: {
       errorMessage: 'Please enter a valid email address',
     },
@@ -10,7 +15,7 @@ export const registerSchema = {
       errorMessage: 'Email is required',
     },
   },
-  password: {
+  'user.password': {
     isLength: {
       options: { min: 6 },
       errorMessage: 'Password must be at least 6 characters long',
@@ -19,7 +24,7 @@ export const registerSchema = {
       errorMessage: 'Password is required',
     },
   },
-  name: {
+  'user.name': {
     notEmpty: {
       errorMessage: 'Name is required',
     },
@@ -27,7 +32,12 @@ export const registerSchema = {
 };
 
 export const loginSchema = {
-  email: {
+  user: {
+    isObject: {
+      errorMessage: 'User object is required',
+    },
+  },
+  'user.email': {
     isEmail: {
       errorMessage: 'Please enter a valid email address',
     },
@@ -35,7 +45,7 @@ export const loginSchema = {
       errorMessage: 'Email is required',
     },
   },
-  password: {
+  'user.password': {
     notEmpty: {
       errorMessage: 'Password is required',
     },

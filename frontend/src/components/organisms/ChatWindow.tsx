@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { ChatInput } from '../molecules/ChatInput';
 import { ChatMessage } from '../molecules/ChatMessage';
 import { Button } from '../atoms/Button';
@@ -20,16 +21,29 @@ export const ChatWindow = ({
   onGetMotivation,
   onGetImprovements,
 }: ChatWindowProps) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chat.messages]);
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {chat.messages.map((message) => {
+        {chat.messages.map((message, index) => {
           // Ensure we have a valid date
           const messageDate = new Date(message.timestamp);
           if (isNaN(messageDate.getTime())) {
             console.warn('Invalid date for message:', message);
             return null;
           }
+
+          const isLastMessage = index === chat.messages.length - 1;
+          const showLoading = loading && isLastMessage && message.sender === 'ai';
 
           return (
             <ChatMessage
@@ -38,9 +52,11 @@ export const ChatWindow = ({
               type={message.sender === 'ai' ? 'assistant' : 'user'}
               timestamp={messageDate}
               mood={message.mood}
+              isLoading={showLoading}
             />
           );
         })}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 border-t border-gray-200 bg-white">
@@ -50,6 +66,7 @@ export const ChatWindow = ({
             onClick={onSummarizeDay}
             className="flex-1"
             disabled={loading}
+            isLoading={loading}
           >
             Summarize Day
           </Button>
@@ -58,6 +75,7 @@ export const ChatWindow = ({
             onClick={onGetMotivation}
             className="flex-1"
             disabled={loading}
+            isLoading={loading}
           >
             Get Motivation
           </Button>
@@ -66,6 +84,7 @@ export const ChatWindow = ({
             onClick={onGetImprovements}
             className="flex-1"
             disabled={loading}
+            isLoading={loading}
           >
             Weekly Improvements
           </Button>

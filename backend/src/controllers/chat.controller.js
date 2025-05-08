@@ -9,36 +9,88 @@ export class ChatController {
     this.geminiService = new GeminiService();
   }
 
-  createChat = async (req, res, next) => {
+  getChats = async (req, res, next) => {
     try {
-      const { title } = req.body;
-      const userId = req.user._id;
+      const userId = req.user.id;
+      logger.info('Fetching all chats for user:', userId);
 
-      const chat = await this.chatRepository.create({
-        user: userId,
-        title,
-        messages: [],
-      });
-
-      res.status(201).json({
+      const chats = await this.chatRepository.findByUserId(userId);
+      
+      res.status(200).json({
         status: 'success',
-        data: chat,
+        data: { chats },
       });
     } catch (error) {
+      logger.error('Error fetching chats:', error);
       next(error);
     }
   };
 
-  getChats = async (req, res, next) => {
+  getChatHistory = async (req, res, next) => {
     try {
-      const userId = req.user._id;
-      const chats = await this.chatRepository.findByUserId(userId);
+      const userId = req.user.id;
+      logger.info('Fetching chat history for user:', userId);
 
+      const chats = await this.chatRepository.findByUserId(userId);
+      
       res.status(200).json({
         status: 'success',
-        data: chats,
+        data: { chats },
       });
     } catch (error) {
+      logger.error('Error fetching chat history:', error);
+      next(error);
+    }
+  };
+
+  createChat = async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const initialMessage = req.body.message || "Hello! I'm your AI assistant. How can I help you today?";
+
+      logger.info('Creating new chat for user:', userId);
+
+      // Generate a title based on the first message
+      let title = 'New Chat';
+      if (initialMessage !== "Hello! I'm your AI assistant. How can I help you today?") {
+        // Use the first 30 characters of the message as the title
+        title = initialMessage.length > 30 
+          ? initialMessage.substring(0, 30) + '...'
+          : initialMessage;
+      }
+
+      // Create chat with initial message
+      const chat = await this.chatRepository.create({
+        userId,
+        title,
+        messages: [{
+          content: initialMessage,
+          sender: 'user',
+          timestamp: new Date().toISOString(),
+          mood: 'neutral'
+        }],
+      });
+
+      // Get AI response
+      const response = await this.geminiService.generateResponse(initialMessage);
+
+      // Update chat with AI response
+      chat.messages.push({
+        content: response,
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      });
+      await chat.save();
+
+      logger.info('Chat created successfully:', chat._id);
+
+      res.status(201).json({
+        status: 'success',
+        data: { chat },
+      });
+    } catch (error) {
+      logger.error('Error creating chat:', error);
       next(error);
     }
   };
@@ -46,20 +98,21 @@ export class ChatController {
   getChat = async (req, res, next) => {
     try {
       const { chatId } = req.params;
-      const userId = req.user._id;
+      const userId = req.user.id;
 
       const chat = await this.chatRepository.findById(chatId);
       if (!chat) {
         throw new AppError('Chat not found', 404);
       }
 
-      if (chat.user.toString() !== userId.toString()) {
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
         throw new AppError('Not authorized to access this chat', 403);
       }
 
       res.status(200).json({
         status: 'success',
-        data: chat,
+        data: { chat },
       });
     } catch (error) {
       next(error);
@@ -70,40 +123,46 @@ export class ChatController {
     try {
       const { chatId } = req.params;
       const { content } = req.body;
-      const userId = req.user._id;
+      const userId = req.user.id;
 
-      // Get chat and verify ownership
+      if (!content) {
+        throw new AppError('Message content is required', 400);
+      }
+
       const chat = await this.chatRepository.findById(chatId);
       if (!chat) {
         throw new AppError('Chat not found', 404);
       }
 
-      if (chat.user.toString() !== userId.toString()) {
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
         throw new AppError('Not authorized to access this chat', 403);
       }
 
       // Add user message
-      const userMessage = {
+      chat.messages.push({
         content,
-        role: 'user',
-      };
-      await this.chatRepository.addMessage(chatId, userMessage);
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      });
+      await chat.save();
 
-      // Generate AI response
-      const aiResponse = await this.geminiService.generateResponse(content);
-      const mood = await this.geminiService.analyzeMood(content);
+      // Get AI response
+      const response = await this.geminiService.generateResponse(content);
 
-      // Add AI message
-      const assistantMessage = {
-        content: aiResponse,
-        role: 'assistant',
-        mood,
-      };
-      const updatedChat = await this.chatRepository.addMessage(chatId, assistantMessage);
+      // Add AI response
+      chat.messages.push({
+        content: response,
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      });
+      await chat.save();
 
       res.status(200).json({
         status: 'success',
-        data: updatedChat,
+        data: { chat },
       });
     } catch (error) {
       next(error);
@@ -113,23 +172,46 @@ export class ChatController {
   updateChat = async (req, res, next) => {
     try {
       const { chatId } = req.params;
-      const { title } = req.body;
-      const userId = req.user._id;
+      const { message } = req.body;
+      const userId = req.user.id;
+
+      if (!message) {
+        throw new AppError('Message is required', 400);
+      }
 
       const chat = await this.chatRepository.findById(chatId);
       if (!chat) {
         throw new AppError('Chat not found', 404);
       }
 
-      if (chat.user.toString() !== userId.toString()) {
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
         throw new AppError('Not authorized to update this chat', 403);
       }
 
-      const updatedChat = await this.chatRepository.update(chatId, { title });
+      // Add user message
+      chat.messages.push({
+        content: message,
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      });
+
+      // Get AI response
+      const response = await this.geminiService.generateResponse(message);
+
+      // Add AI response
+      chat.messages.push({
+        content: response,
+        sender: 'ai',
+        timestamp: new Date().toISOString(),
+        mood: 'neutral'
+      });
+      await chat.save();
 
       res.status(200).json({
         status: 'success',
-        data: updatedChat,
+        data: { chat },
       });
     } catch (error) {
       next(error);
@@ -139,20 +221,21 @@ export class ChatController {
   deleteChat = async (req, res, next) => {
     try {
       const { chatId } = req.params;
-      const userId = req.user._id;
+      const userId = req.user.id;
 
       const chat = await this.chatRepository.findById(chatId);
       if (!chat) {
         throw new AppError('Chat not found', 404);
       }
 
-      if (chat.user.toString() !== userId.toString()) {
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
         throw new AppError('Not authorized to delete this chat', 403);
       }
 
       await this.chatRepository.delete(chatId);
 
-      res.status(204).json({
+      res.status(200).json({
         status: 'success',
         data: null,
       });
@@ -164,25 +247,23 @@ export class ChatController {
   getSummary = async (req, res, next) => {
     try {
       const { chatId } = req.params;
-      const userId = req.user._id;
+      const userId = req.user.id;
 
       const chat = await this.chatRepository.findById(chatId);
       if (!chat) {
         throw new AppError('Chat not found', 404);
       }
 
-      if (chat.user.toString() !== userId.toString()) {
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
         throw new AppError('Not authorized to access this chat', 403);
       }
 
-      const messages = chat.messages.map(msg => msg.content);
-      const summary = await this.geminiService.generateSummary(messages);
-
-      const updatedChat = await this.chatRepository.update(chatId, { summary });
+      const summary = await this.geminiService.generateSummary(chat.messages);
 
       res.status(200).json({
         status: 'success',
-        data: updatedChat,
+        data: { summary },
       });
     } catch (error) {
       next(error);
@@ -192,25 +273,23 @@ export class ChatController {
   getInsights = async (req, res, next) => {
     try {
       const { chatId } = req.params;
-      const userId = req.user._id;
+      const userId = req.user.id;
 
       const chat = await this.chatRepository.findById(chatId);
       if (!chat) {
         throw new AppError('Chat not found', 404);
       }
 
-      if (chat.user.toString() !== userId.toString()) {
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
         throw new AppError('Not authorized to access this chat', 403);
       }
 
-      const messages = chat.messages.map(msg => msg.content);
-      const insights = await this.geminiService.generateInsights(messages);
-
-      const updatedChat = await this.chatRepository.update(chatId, { insights });
+      const insights = await this.geminiService.generateInsights(chat.messages);
 
       res.status(200).json({
         status: 'success',
-        data: updatedChat,
+        data: { insights },
       });
     } catch (error) {
       next(error);

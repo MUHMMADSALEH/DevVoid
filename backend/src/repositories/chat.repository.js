@@ -1,4 +1,5 @@
 import { Chat } from '../models/chat.model.js';
+import { AppError } from '../middleware/errorHandler.js';
 
 export class ChatRepository {
   async create(chatData) {
@@ -6,7 +7,7 @@ export class ChatRepository {
       const chat = new Chat(chatData);
       return await chat.save();
     } catch (error) {
-      throw error;
+      throw new AppError('Failed to create chat', 500);
     }
   }
 
@@ -14,15 +15,15 @@ export class ChatRepository {
     try {
       return await Chat.findById(id);
     } catch (error) {
-      throw error;
+      throw new AppError('Failed to find chat', 500);
     }
   }
 
   async findByUserId(userId) {
     try {
-      return await Chat.find({ user: userId }).sort({ createdAt: -1 });
+      return await Chat.find({ userId }).sort({ createdAt: -1 });
     } catch (error) {
-      throw error;
+      throw new AppError('Failed to find chats', 500);
     }
   }
 
@@ -62,19 +63,19 @@ export class ChatRepository {
     }
   }
 
-  async update(chatId, updateData) {
+  async update(id, updateData) {
     try {
-      return await Chat.findByIdAndUpdate(chatId, updateData, { new: true });
+      return await Chat.findByIdAndUpdate(id, updateData, { new: true });
     } catch (error) {
-      throw error;
+      throw new AppError('Failed to update chat', 500);
     }
   }
 
-  async delete(chatId) {
+  async delete(id) {
     try {
-      return await Chat.findByIdAndDelete(chatId);
+      return await Chat.findByIdAndDelete(id);
     } catch (error) {
-      throw error;
+      throw new AppError('Failed to delete chat', 500);
     }
   }
 

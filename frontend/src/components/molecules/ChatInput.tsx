@@ -27,14 +27,17 @@ export const ChatInput = ({ onSend, isLoading }: ChatInputProps) => {
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type your message..."
-        className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFD600] focus:border-transparent"
+        placeholder={isLoading ? "AI is thinking..." : "Type your message..."}
+        className={`flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFD600] focus:border-transparent transition-all duration-200 ${
+          isLoading ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
         disabled={isLoading}
       />
       <Button
         type="submit"
         variant="primary"
         disabled={!message.trim() || isLoading}
+        isLoading={isLoading}
       >
         Send
       </Button>

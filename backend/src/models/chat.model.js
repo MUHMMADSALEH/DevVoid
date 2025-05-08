@@ -2,14 +2,22 @@ import mongoose from 'mongoose';
 
 const messageSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      default: () => new Date().getTime().toString(),
+    },
     content: {
       type: String,
-      required: [true, 'Message content is required'],
-    },
-    role: {
-      type: String,
-      enum: ['user', 'assistant'],
       required: true,
+    },
+    sender: {
+      type: String,
+      enum: ['user', 'ai'],
+      required: true,
+    },
+    timestamp: {
+      type: String,
+      default: () => new Date().toISOString(),
     },
     mood: {
       type: String,
@@ -24,25 +32,19 @@ const messageSchema = new mongoose.Schema(
 
 const chatSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     title: {
       type: String,
-      required: [true, 'Chat title is required'],
+      required: true,
+      default: 'New Chat',
       trim: true,
+      maxlength: [100, 'Title cannot be more than 100 characters'],
     },
     messages: [messageSchema],
-    summary: {
-      type: String,
-      default: '',
-    },
-    insights: {
-      type: String,
-      default: '',
-    },
   },
   {
     timestamps: true,
@@ -50,6 +52,6 @@ const chatSchema = new mongoose.Schema(
 );
 
 // Index for faster queries
-chatSchema.index({ user: 1, createdAt: -1 });
+chatSchema.index({ userId: 1, createdAt: -1 });
 
 export const Chat = mongoose.model('Chat', chatSchema); 

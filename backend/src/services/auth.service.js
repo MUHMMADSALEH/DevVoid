@@ -64,10 +64,17 @@ export class AuthService {
     try {
       logger.info('Attempting login for email:', email);
 
-      // Find user
-      const user = await this.userRepository.findByEmail(email);
-      if (!user || !user._id) {
+      // Find user and explicitly select password field
+      const user = await this.userRepository.findByEmailWithPassword(email);
+      
+      // Check if user exists and has password
+      if (!user) {
         logger.error('User not found for email:', email);
+        throw new AppError('Invalid credentials', 401);
+      }
+
+      if (!user.password) {
+        logger.error('User has no password set:', email);
         throw new AppError('Invalid credentials', 401);
       }
 

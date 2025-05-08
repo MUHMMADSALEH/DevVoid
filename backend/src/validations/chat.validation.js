@@ -1,14 +1,25 @@
-import expressValidator from 'express-validator';
-const { checkSchema } = expressValidator;
+import { body } from 'express-validator';
 
 export const messageSchema = {
+  chatId: {
+    in: ['body'],
+    isString: true,
+    notEmpty: true,
+    errorMessage: 'Chat ID is required',
+  },
   content: {
-    notEmpty: {
-      errorMessage: 'Message content is required',
-    },
-    isLength: {
-      options: { min: 1, max: 1000 },
-      errorMessage: 'Message must be between 1 and 1000 characters',
+    in: ['body'],
+    isString: true,
+    notEmpty: true,
+    errorMessage: 'Message content is required',
+  },
+  type: {
+    in: ['body'],
+    isString: true,
+    optional: true,
+    isIn: {
+      options: [['user', 'ai']],
+      errorMessage: 'Message type must be either "user" or "ai"',
     },
   },
 }; 

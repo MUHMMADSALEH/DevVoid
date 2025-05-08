@@ -3,23 +3,23 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, 'Please provide your name'],
-      trim: true,
-    },
     email: {
       type: String,
-      required: [true, 'Please provide your email'],
+      required: [true, 'Email is required'],
       unique: true,
-      lowercase: true,
       trim: true,
+      lowercase: true,
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
-      minlength: 6,
-      select: false,
+      required: [true, 'Password is required'],
+      minlength: [6, 'Password must be at least 6 characters long'],
+      select: false, // Don't include password in queries by default
+    },
+    name: {
+      type: String,
+      required: [true, 'Name is required'],
+      trim: true,
     },
   },
   {
@@ -43,9 +43,12 @@ userSchema.pre('save', async function (next) {
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
+    if (!this.password) {
+      return false;
+    }
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
-    throw error;
+    return false;
   }
 };
 
