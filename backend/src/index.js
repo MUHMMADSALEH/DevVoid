@@ -31,6 +31,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Server is healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Log all requests
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.url}`, {
