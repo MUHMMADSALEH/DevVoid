@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -26,7 +26,7 @@ app.use(cors());
 app.use(express.json());
 
 // Log all requests
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`, {
     body: req.body,
     headers: req.headers,
@@ -50,13 +50,13 @@ mongoose
       logger.info(`Server is running on port ${PORT}`);
     });
   })
-  .catch((error: Error) => {
+  .catch((error) => {
     logger.error('MongoDB connection error:', error);
     process.exit(1);
   });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (error: Error) => {
+process.on('unhandledRejection', (error) => {
   logger.error('Unhandled Promise Rejection:', error);
   process.exit(1);
 }); 

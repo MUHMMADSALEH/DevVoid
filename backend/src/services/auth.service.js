@@ -1,9 +1,7 @@
-import { Request, Response } from 'express';
-import jwt, { Secret, SignOptions, JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { UserRepository } from '../repositories/user.repository.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { IUser } from '../models/user.model.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -17,24 +15,7 @@ const __dirname = dirname(__filename);
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  token: string;
-}
-
-interface TokenPayload extends JwtPayload {
-  id: string;
-}
-
 export class AuthService {
-  private userRepository: UserRepository;
-  private JWT_SECRET: Buffer;
-  private JWT_EXPIRES_IN: number;
-
   constructor() {
     this.userRepository = new UserRepository();
     const secret = process.env.JWT_SECRET || 'your-secret-key';
@@ -43,7 +24,7 @@ export class AuthService {
     this.JWT_EXPIRES_IN = parseInt(process.env.JWT_EXPIRES_IN || '86400', 10);
   }
 
-  async register(email: string, password: string, name: string): Promise<AuthResponse> {
+  async register(email, password, name) {
     try {
       // Check if user already exists
       const existingUser = await this.userRepository.findByEmail(email);
@@ -79,7 +60,7 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(email, password) {
     try {
       logger.info('Attempting login for email:', email);
 
@@ -119,26 +100,26 @@ export class AuthService {
     }
   }
 
-  private generateToken(userId: string): string {
+  generateToken(userId) {
     if (!this.JWT_SECRET) {
       throw new AppError('JWT secret is not configured', 500);
     }
 
     try {
-      const options: SignOptions = { expiresIn: this.JWT_EXPIRES_IN };
+      const options = { expiresIn: this.JWT_EXPIRES_IN };
       return jwt.sign({ id: userId }, this.JWT_SECRET, options);
     } catch (error) {
       throw new AppError('Failed to generate token', 500);
     }
   }
 
-  verifyToken(token: string): TokenPayload {
+  verifyToken(token) {
     if (!this.JWT_SECRET) {
       throw new AppError('JWT secret is not configured', 500);
     }
 
     try {
-      return jwt.verify(token, this.JWT_SECRET) as TokenPayload;
+      return jwt.verify(token, this.JWT_SECRET);
     } catch (error) {
       throw new AppError('Invalid token', 401);
     }

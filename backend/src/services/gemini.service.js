@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -13,9 +13,6 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
-  private model: GenerativeModel;
-
   constructor() {
     const apiKey = process.env.GEMINI_API_KEY;
     console.log('Initializing GeminiService with API key:', apiKey ? 'Present' : 'Missing');
@@ -36,20 +33,20 @@ export class GeminiService {
         },
         safetySettings: [
           {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
           },
           {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
           },
           {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
           },
           {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
           },
         ],
       });
@@ -60,7 +57,7 @@ export class GeminiService {
     }
   }
 
-  private async generateText(prompt: string): Promise<string> {
+  async generateText(prompt) {
     console.log('Generating text with prompt:', prompt);
     try {
       const result = await this.model.generateContent({
@@ -70,7 +67,7 @@ export class GeminiService {
       const text = response.text();
       console.log('Generated response:', text);
       return text;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Gemini API Error:', error);
       if (error.message?.includes('API key')) {
         throw new AppError('Invalid Gemini API key', 500);
@@ -79,7 +76,7 @@ export class GeminiService {
     }
   }
 
-  async generateResponse(userMessage: string): Promise<string> {
+  async generateResponse(userMessage) {
     console.log('Generating response for message:', userMessage);
     try {
       const prompt = `You are a supportive AI journaling companion. Your role is to help users reflect on their thoughts and experiences. 
@@ -100,7 +97,7 @@ export class GeminiService {
     }
   }
 
-  async analyzeMood(message: string): Promise<string> {
+  async analyzeMood(message) {
     console.log('Analyzing mood for message:', message);
     try {
       const prompt = `Analyze the emotional tone of this journal entry and respond with exactly one of these emotions: happy, sad, neutral, stressed, excited. 
@@ -126,7 +123,7 @@ export class GeminiService {
     }
   }
 
-  async generateSummary(messages: string[]): Promise<string> {
+  async generateSummary(messages) {
     console.log('Generating summary for messages:', messages);
     try {
       if (!messages.length) {
@@ -151,7 +148,7 @@ export class GeminiService {
     }
   }
 
-  async generateInsights(messages: string[]): Promise<string> {
+  async generateInsights(messages) {
     console.log('Generating insights for messages:', messages);
     try {
       if (!messages.length) {
