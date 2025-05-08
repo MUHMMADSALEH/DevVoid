@@ -30,7 +30,12 @@
     "paths": {
       "*": ["node_modules/*"]
     },
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": false,
+    "noEmitOnError": false,
+    "preserveConstEnums": false,
+    "removeComments": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

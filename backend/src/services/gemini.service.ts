@@ -2,11 +2,15 @@ import { GoogleGenerativeAI, GenerativeModel, HarmCategory, HarmBlockThreshold }
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { AppError } from '../middleware/errorHandler.js';
 
+// Get the directory name
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+const __dirname = dirname(__filename);
+
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;

@@ -8,10 +8,11 @@ import authRoutes from './routes/auth.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // Get the directory name
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
