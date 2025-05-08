@@ -270,6 +270,58 @@ export class ChatController {
     }
   };
 
+  getMotivation = async (req, res, next) => {
+    try {
+      const { chatId } = req.params;
+      const userId = req.user.id;
+
+      const chat = await this.chatRepository.findById(chatId);
+      if (!chat) {
+        throw new AppError('Chat not found', 404);
+      }
+
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
+        throw new AppError('Not authorized to access this chat', 403);
+      }
+
+      const motivation = await this.geminiService.generateMotivation(chat.messages);
+
+      res.status(200).json({
+        status: 'success',
+        data: { motivation },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getImprovements = async (req, res, next) => {
+    try {
+      const { chatId } = req.params;
+      const userId = req.user.id;
+
+      const chat = await this.chatRepository.findById(chatId);
+      if (!chat) {
+        throw new AppError('Chat not found', 404);
+      }
+
+      // Check if chat belongs to user
+      if (chat.userId.toString() !== userId) {
+        throw new AppError('Not authorized to access this chat', 403);
+      }
+
+      const improvements = await this.geminiService.generateImprovements(chat.messages);
+
+      res.status(200).json({
+        status: 'success',
+        data: { improvements },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getInsights = async (req, res, next) => {
     try {
       const { chatId } = req.params;

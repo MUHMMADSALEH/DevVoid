@@ -137,7 +137,7 @@ export class GeminiService {
       4. Growth or changes observed
       
       Journal entries:
-      ${messages.join('\n\n')}`;
+      ${messages.map(m => m.content).join('\n\n')}`;
       
       const summary = await this.generateText(prompt);
       console.log('Generated summary:', summary);
@@ -145,6 +145,56 @@ export class GeminiService {
     } catch (error) {
       console.error('Error generating summary:', error);
       throw new AppError('Failed to generate journal summary', 500);
+    }
+  }
+
+  async generateMotivation(messages) {
+    console.log('Generating motivation for messages:', messages);
+    try {
+      if (!messages.length) {
+        return 'No entries to analyze for motivation';
+      }
+
+      const prompt = `Based on these journal entries, provide motivational insights and encouragement. Focus on:
+      1. Positive aspects and achievements
+      2. Growth opportunities
+      3. Encouraging words and support
+      4. Actionable steps for moving forward
+      
+      Journal entries:
+      ${messages.map(m => m.content).join('\n\n')}`;
+      
+      const motivation = await this.generateText(prompt);
+      console.log('Generated motivation:', motivation);
+      return motivation;
+    } catch (error) {
+      console.error('Error generating motivation:', error);
+      throw new AppError('Failed to generate motivation', 500);
+    }
+  }
+
+  async generateImprovements(messages) {
+    console.log('Generating improvements for messages:', messages);
+    try {
+      if (!messages.length) {
+        return 'No entries to analyze for improvements';
+      }
+
+      const prompt = `Based on these journal entries, suggest areas for improvement and growth. Focus on:
+      1. Patterns that could be changed
+      2. Healthy coping strategies
+      3. Self-care suggestions
+      4. Practical steps for personal development
+      
+      Journal entries:
+      ${messages.map(m => m.content).join('\n\n')}`;
+      
+      const improvements = await this.generateText(prompt);
+      console.log('Generated improvements:', improvements);
+      return improvements;
+    } catch (error) {
+      console.error('Error generating improvements:', error);
+      throw new AppError('Failed to generate improvements', 500);
     }
   }
 

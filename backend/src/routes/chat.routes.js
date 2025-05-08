@@ -48,10 +48,9 @@ router.patch('/:chatId', chatController.updateChat);
 // Delete a chat
 router.delete('/:chatId', chatController.deleteChat);
 
-// Get chat summary
-router.get('/:chatId/summary', chatController.getSummary);
-
-// Get chat insights
-router.get('/:chatId/insights', chatController.getInsights);
+// Chat analysis endpoints
+router.post('/:chatId/summary', chatController.getSummary);
+router.post('/:chatId/motivation', chatController.getMotivation);
+router.post('/:chatId/improvements', chatController.getImprovements);
 
 export default router; 
