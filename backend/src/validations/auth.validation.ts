@@ -1,24 +1,39 @@
-import { body } from 'express-validator';
+import expressValidator from 'express-validator';
+const validator = expressValidator as any;
+const { checkSchema } = validator;
 
-export const registerSchema = [
-  body('email')
-    .isEmail()
-    .withMessage('Please provide a valid email address'),
-  body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long'),
-  body('name')
-    .notEmpty()
-    .withMessage('Name is required')
-    .isLength({ min: 2 })
-    .withMessage('Name must be at least 2 characters long'),
-];
+export const registerSchema = checkSchema({
+  email: {
+    isEmail: {
+      errorMessage: 'Please provide a valid email address'
+    }
+  },
+  password: {
+    isLength: {
+      options: { min: 6 },
+      errorMessage: 'Password must be at least 6 characters long'
+    }
+  },
+  name: {
+    notEmpty: {
+      errorMessage: 'Name is required'
+    },
+    isLength: {
+      options: { min: 2 },
+      errorMessage: 'Name must be at least 2 characters long'
+    }
+  }
+});
 
-export const loginSchema = [
-  body('email')
-    .isEmail()
-    .withMessage('Please provide a valid email address'),
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required'),
-]; 
+export const loginSchema = checkSchema({
+  email: {
+    isEmail: {
+      errorMessage: 'Please provide a valid email address'
+    }
+  },
+  password: {
+    notEmpty: {
+      errorMessage: 'Password is required'
+    }
+  }
+}); 

@@ -4,7 +4,7 @@ services:
     env: node
     buildCommand: |
       npm install && 
-      npm install --save-dev @types/node @types/express @types/jest @types/cors @types/mongoose @types/bcryptjs @types/jsonwebtoken @types/winston @types/dotenv @types/url @types/path @types/express-validator @google/generative-ai && 
+      npm install --save-dev @types/node @types/express @types/jest @types/cors @types/mongoose @types/bcryptjs @types/jsonwebtoken @types/winston @types/dotenv @types/express-validator && 
       npm run build
     startCommand: npm start
     envVars:

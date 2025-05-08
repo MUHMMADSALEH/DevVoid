@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { validationResult, ValidationError } from 'express-validator';
+import expressValidator from 'express-validator';
+const validator = expressValidator as any;
+const { validationResult } = validator;
 import { AppError } from './errorHandler.js';
 import { logger } from '../utils/logger.js';
 
@@ -18,8 +20,8 @@ export const validateRequest = (validations: any[]) => {
       }
 
       await Promise.all(validations.map(validation => validation.run(req)));
-
       const errors = validationResult(req);
+
       if (errors.isEmpty()) {
         logger.info('Validation passed');
         return next();

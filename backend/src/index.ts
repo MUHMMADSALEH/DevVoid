@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -25,7 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 // Log all requests
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   logger.info(`${req.method} ${req.path}`, {
     body: req.body,
     headers: req.headers,
@@ -49,7 +49,7 @@ mongoose
       logger.info(`Server is running on port ${PORT}`);
     });
   })
-  .catch((error) => {
+  .catch((error: Error) => {
     logger.error('MongoDB connection error:', error);
     process.exit(1);
   });

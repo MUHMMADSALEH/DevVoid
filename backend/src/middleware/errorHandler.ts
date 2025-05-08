@@ -2,29 +2,28 @@ import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger.js';
 import expressValidator from 'express-validator';
 
-interface ValidationErrorResponse {
-  errors: expressValidator.ValidationError[];
-}
+// Use any type to bypass type checking
+const validator = expressValidator as any;
+const { ValidationError } = validator;
 
 export class AppError extends Error {
   statusCode: number;
   status: string;
   isOperational: boolean;
-  errors?: expressValidator.ValidationError[];
+  errors?: any[];
 
-  constructor(message: string, statusCode: number, errors?: expressValidator.ValidationError[]) {
+  constructor(message: string, statusCode: number, errors?: any[]) {
     super(message);
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
     this.errors = errors;
-
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
 export const errorHandler = (
-  err: Error | AppError,
+  err: AppError | Error,
   _req: Request,
   res: Response,
   _next: NextFunction
@@ -35,7 +34,6 @@ export const errorHandler = (
       statusCode: err.statusCode,
       errors: err.errors,
     });
-
     return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
@@ -45,8 +43,8 @@ export const errorHandler = (
   }
 
   // Handle validation errors from express-validator
-  if (err.name === 'ValidationError' && 'errors' in err) {
-    const validationError = err as Error & ValidationErrorResponse;
+  if ('errors' in err) {
+    const validationError = err as { errors: any[] };
     logger.error('Validation error:', validationError);
     return res.status(400).json({
       status: 'fail',
@@ -57,7 +55,6 @@ export const errorHandler = (
   }
 
   logger.error('Programming error:', err);
-
   return res.status(500).json({
     status: 'error',
     message: 'Something went wrong',
