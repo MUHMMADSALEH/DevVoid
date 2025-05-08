@@ -222,4 +222,36 @@ export class GeminiService {
       throw new AppError('Failed to generate journal insights', 500);
     }
   }
+
+  async generateTitle(messages) {
+    console.log('Generating title for messages:', messages);
+    try {
+      if (!messages.length) {
+        return 'New Chat';
+      }
+
+      const prompt = `Generate a short, meaningful title (max 30 characters) for this conversation. The title should:
+      1. Capture the main theme or topic
+      2. Be concise and clear
+      3. Be engaging and personal
+      4. Not include quotes or special characters
+      
+      Conversation:
+      ${messages.map(m => m.content).join('\n\n')}`;
+      
+      const title = await this.generateText(prompt);
+      // Clean and truncate the title
+      const cleanTitle = title
+        .replace(/["']/g, '') // Remove quotes
+        .replace(/[^\w\s-]/g, '') // Remove special characters
+        .trim()
+        .substring(0, 30); // Truncate to 30 chars
+      
+      console.log('Generated title:', cleanTitle);
+      return cleanTitle || 'New Chat';
+    } catch (error) {
+      console.error('Error generating title:', error);
+      return 'New Chat';
+    }
+  }
 } 

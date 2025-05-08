@@ -50,19 +50,10 @@ export class ChatController {
 
       logger.info('Creating new chat for user:', userId);
 
-      // Generate a title based on the first message
-      let title = 'New Chat';
-      if (initialMessage !== "Hello! I'm your AI assistant. How can I help you today?") {
-        // Use the first 30 characters of the message as the title
-        title = initialMessage.length > 30 
-          ? initialMessage.substring(0, 30) + '...'
-          : initialMessage;
-      }
-
       // Create chat with initial message
       const chat = await this.chatRepository.create({
         userId,
-        title,
+        title: 'New Chat', // Initial title
         messages: [{
           content: initialMessage,
           sender: 'user',
@@ -74,13 +65,16 @@ export class ChatController {
       // Get AI response
       const response = await this.geminiService.generateResponse(initialMessage);
 
-      // Update chat with AI response
+      // Add AI response
       chat.messages.push({
         content: response,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         mood: 'neutral'
       });
+
+      // Generate title based on the conversation
+      chat.title = await this.geminiService.generateTitle(chat.messages);
       await chat.save();
 
       logger.info('Chat created successfully:', chat._id);
@@ -158,6 +152,11 @@ export class ChatController {
         timestamp: new Date().toISOString(),
         mood: 'neutral'
       });
+
+      // Update title if this is one of the first few messages
+      if (chat.messages.length <= 6) {
+        chat.title = await this.geminiService.generateTitle(chat.messages);
+      }
       await chat.save();
 
       res.status(200).json({
