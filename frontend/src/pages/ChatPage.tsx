@@ -3,14 +3,28 @@ import { ChatSidebar } from '../components/organisms/ChatSidebar';
 import { ChatWindow } from '../components/organisms/ChatWindow';
 import { chatApi } from '../services/api';
 import { Chat, Message } from '../types/chat';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export const ChatPage = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchChatHistory();
+  }, []);
+
+  // Close sidebar when screen size changes to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const generateChatTitle = (messages: Chat['messages']) => {
@@ -185,14 +199,41 @@ export const ChatPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#F8F7F2]">
-      <ChatSidebar
-        chats={chats}
-        currentChat={currentChat}
-        onSelectChat={setCurrentChat}
-        onCreateChat={handleCreateChat}
-      />
-      <div className="flex-1 flex flex-col">
+    <div className="flex h-screen bg-[#F8F7F2] relative">
+      {/* Mobile menu button */}
+      <button
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-md bg-white shadow-md"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        {isSidebarOpen ? (
+          <XMarkIcon className="h-6 w-6 text-gray-600" />
+        ) : (
+          <Bars3Icon className="h-6 w-6 text-gray-600" />
+        )}
+      </button>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed lg:static inset-0 z-40 transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-50 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
+        <div className="relative h-full w-80 bg-white">
+          <ChatSidebar
+            chats={chats}
+            currentChat={currentChat}
+            onSelectChat={(chat) => {
+              setCurrentChat(chat);
+              setIsSidebarOpen(false);
+            }}
+            onCreateChat={handleCreateChat}
+          />
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col w-full">
         {currentChat ? (
           <ChatWindow
             chat={currentChat}

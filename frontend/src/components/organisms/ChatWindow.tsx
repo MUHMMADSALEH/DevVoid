@@ -33,6 +33,14 @@ export const ChatWindow = ({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Chat header */}
+      <div className="bg-white border-b border-gray-200 p-4 lg:px-4 px-16">
+        <h2 className="text-lg font-semibold text-[#3B2F1E] truncate text-center lg:text-left">
+          {chat.title || 'New Chat'}
+        </h2>
+      </div>
+
+      {/* Messages container */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {chat.messages.map((message, index) => {
           // Ensure we have a valid date
@@ -59,8 +67,10 @@ export const ChatWindow = ({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Action buttons and input */}
       <div className="p-4 border-t border-gray-200 bg-white">
-        <div className="flex gap-2 mb-4">
+        {/* Action buttons - hidden on mobile, shown on tablet and up */}
+        <div className="hidden md:flex gap-2 mb-4">
           <Button
             variant="secondary"
             onClick={onSummarizeDay}
@@ -87,6 +97,37 @@ export const ChatWindow = ({
             isLoading={loading}
           >
             Weekly Improvements
+          </Button>
+        </div>
+
+        {/* Mobile action buttons - shown in a grid */}
+        <div className="md:hidden grid grid-cols-3 gap-2 mb-4">
+          <Button
+            variant="secondary"
+            onClick={onSummarizeDay}
+            className="text-sm"
+            disabled={loading}
+            isLoading={loading}
+          >
+            Summary
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onGetMotivation}
+            className="text-sm"
+            disabled={loading}
+            isLoading={loading}
+          >
+            Motivation
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onGetImprovements}
+            className="text-sm"
+            disabled={loading}
+            isLoading={loading}
+          >
+            Improvements
           </Button>
         </div>
 
